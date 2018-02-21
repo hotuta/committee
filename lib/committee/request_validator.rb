@@ -2,6 +2,7 @@ module Committee
   class RequestValidator
     def initialize(link, options = {})
       @link = link
+      @logger = options[:logger]
       @check_content_type = options.fetch(:check_content_type, true)
     end
 
@@ -11,7 +12,11 @@ module Committee
         valid, errors = @link.schema.validate(data)
         if !valid
           errors = JsonSchema::SchemaError.aggregate(errors).join("\n")
-          raise InvalidRequest, "Invalid request.\n\n#{errors}"
+          if @logger
+            @logger.call.warn "Invalid request.\n\n#{errors}"
+          else
+            raise InvalidRequest, "Invalid request.\n\n#{errors}"
+          end
         end
       end
     end
@@ -26,8 +31,12 @@ module Committee
       content_type = request_media_type(request)
       if content_type && @link.enc_type && !empty_request?(request)
         unless Rack::Mime.match?(content_type, @link.enc_type)
-          raise Committee::InvalidRequest,
-            %{"Content-Type" request header must be set to "#{@link.enc_type}".}
+          if @logger
+            @logger.call.warn %{"Content-Type" request header must be set to "#{@link.enc_type}".}
+          else
+            raise Committee::InvalidRequest,
+                  %{"Content-Type" request header must be set to "#{@link.enc_type}".}
+          end
         end
       end
     end
