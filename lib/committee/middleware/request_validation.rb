@@ -8,6 +8,7 @@ module Committee::Middleware
       @check_content_type  = options.fetch(:check_content_type, true)
       @optimistic_json     = options.fetch(:optimistic_json, false)
       @strict              = options[:strict]
+      @logger              = options[:logger]
       @coerce_date_times   = options.fetch(:coerce_date_times, false)
       @coerce_recursive = options.fetch(:coerce_recursive, true)
 
@@ -51,7 +52,7 @@ module Committee::Middleware
       request.env[@params_key].merge!(param_matches) if param_matches
 
       if link
-        validator = Committee::RequestValidator.new(link, check_content_type: @check_content_type)
+        validator = Committee::RequestValidator.new(link, check_content_type: @check_content_type, logger: @logger)
         validator.call(request, request.env[@params_key])
 
         parameter_coerce!(request, link, @params_key)
@@ -59,7 +60,11 @@ module Committee::Middleware
 
         @app.call(request.env)
       elsif @strict
-        raise Committee::NotFound, "That request method and path combination isn't defined."
+        if @logger
+          raise Committee::NotFound, "That request method and path combination isn't defined."
+        else
+          @logger.call.warn("That request method and path combination isn't defined.") && @app.call(request.env)
+        end
       else
         @app.call(request.env)
       end
