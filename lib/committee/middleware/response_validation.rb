@@ -5,6 +5,7 @@ module Committee::Middleware
     def initialize(app, options = {})
       super
       @validate_errors = options[:validate_errors]
+      @logger = options[:logger]
     end
 
     def handle(request)
@@ -17,7 +18,7 @@ module Committee::Middleware
           full_body << chunk
         end
         data = JSON.parse(full_body)
-        Committee::ResponseValidator.new(link, validate_errors: validate_errors).call(status, headers, data)
+        Committee::ResponseValidator.new(link, validate_errors: validate_errors, logger: @logger).call(status, headers, data)
       end
 
       [status, headers, response]
