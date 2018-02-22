@@ -13,7 +13,7 @@ module Committee
         if !valid
           errors = JsonSchema::SchemaError.aggregate(errors).join("\n")
           if @logger
-            @logger.call.warn "Invalid request.\n\n#{errors}"
+            @logger.call.warn "[Committee] Invalid request.\n\n#{errors}"
           else
             raise InvalidRequest, "Invalid request.\n\n#{errors}"
           end
@@ -32,7 +32,7 @@ module Committee
       if content_type && @link.enc_type && !empty_request?(request)
         unless Rack::Mime.match?(content_type, @link.enc_type)
           if @logger
-            @logger.call.warn %{"Content-Type" request header must be set to "#{@link.enc_type}".}
+            @logger.call.warn %{[Committee] "Content-Type" request header must be set to "#{@link.enc_type}".}
           else
             raise Committee::InvalidRequest,
                   %{"Content-Type" request header must be set to "#{@link.enc_type}".}

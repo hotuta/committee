@@ -61,7 +61,7 @@ module Committee::Middleware
         @app.call(request.env)
       elsif @strict
         if @logger
-          @logger.call.warn("That request method and path combination isn't defined.") && @app.call(request.env)
+          @logger.call.warn("[Committee] That request method and path combination isn't defined.") && @app.call(request.env)
         else
           raise Committee::NotFound, "That request method and path combination isn't defined."
         end
