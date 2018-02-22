@@ -32,7 +32,7 @@ module Committee
       if legacy_hyper_schema_rel?(@link)
         if !data.is_a?(Array)
           if @logger
-            @logger.call.warn "List endpoints must return an array of objects."
+            @logger.call.warn "[Committee] List endpoints must return an array of objects."
           else
             raise InvalidResponse, "List endpoints must return an array of objects."
           end
@@ -49,7 +49,7 @@ module Committee
       if self.class.validate?(status, validate_errors: validate_errors) && !@validator.validate(data)
         errors = JsonSchema::SchemaError.aggregate(@validator.errors).join("\n")
         if @logger
-          @logger.call.warn "Invalid response.\n\n#{errors}"
+          @logger.call.warn "[Committee] Invalid response.\n\n#{errors}"
         else
           raise InvalidResponse, "Invalid response.\n\n#{errors}"
         end
@@ -66,7 +66,7 @@ module Committee
       if @link.media_type
         unless Rack::Mime.match?(response_media_type(response), @link.media_type)
           if @logger
-            @logger.call.warn %{"Content-Type" response header must be set to "#{@link.media_type}".}
+            @logger.call.warn %{[Committee] "Content-Type" response header must be set to "#{@link.media_type}".}
           else
             raise Committee::InvalidResponse,
                   %{"Content-Type" response header must be set to "#{@link.media_type}".}
